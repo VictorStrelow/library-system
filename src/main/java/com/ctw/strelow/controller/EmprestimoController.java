@@ -1,5 +1,7 @@
 package com.ctw.strelow.controller;
 
+import com.ctw.strelow.dto.emprestimo.EmprestimoRequestDTO;
+import com.ctw.strelow.dto.emprestimo.EmprestimoResponseDTO;
 import com.ctw.strelow.model.Emprestimo;
 import com.ctw.strelow.service.EmprestimoService;
 import org.springframework.http.HttpStatus;
@@ -20,10 +22,9 @@ public class EmprestimoController {
     }
 
     @PostMapping
-    public ResponseEntity<?> postEmprestimo(@RequestBody Emprestimo emprestimo) {
+    public ResponseEntity<?> postEmprestimo(@RequestBody EmprestimoRequestDTO emprestimoRequestDTO) {
         try {
-            emprestimoService.save(emprestimo);
-            return new ResponseEntity<>(emprestimo, HttpStatus.CREATED);
+            return new ResponseEntity<>(emprestimoService.save(emprestimoRequestDTO), HttpStatus.CREATED);
 
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -34,7 +35,7 @@ public class EmprestimoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Emprestimo>> getAll() {
+    public ResponseEntity<List<EmprestimoResponseDTO>> getAll() {
         try {
             return ResponseEntity.ok(emprestimoService.findAll());
 
@@ -46,8 +47,7 @@ public class EmprestimoController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable int id) {
         try {
-            Emprestimo emprestimo = emprestimoService.fingById(id);
-            return ResponseEntity.ok(emprestimo);
+            return ResponseEntity.ok(emprestimoService.fingById(id));
 
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -58,11 +58,9 @@ public class EmprestimoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> putEmprestimo(@PathVariable int id, @RequestBody Emprestimo emprestimo) {
+    public ResponseEntity<?> putEmprestimo(@PathVariable int id, @RequestBody EmprestimoRequestDTO dto) {
         try {
-            emprestimo.setId(id);
-            emprestimoService.update(emprestimo);
-            return ResponseEntity.ok(emprestimo);
+            return ResponseEntity.ok(emprestimoService.update(id, dto));
 
         } catch (SQLException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());

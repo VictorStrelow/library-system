@@ -1,12 +1,15 @@
 package com.ctw.strelow.service;
 
 import com.ctw.strelow.dao.UsuarioDAO;
-import com.ctw.strelow.model.Livro;
+import com.ctw.strelow.dto.usuario.UsuarioRequestDTO;
+import com.ctw.strelow.dto.usuario.UsuarioResponseDTO;
+import com.ctw.strelow.mapper.UsuarioMapper;
 import com.ctw.strelow.model.Usuario;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UsuarioService {
@@ -17,32 +20,42 @@ public class UsuarioService {
         this.usuarioDAO = usuarioDAO;
     }
 
-    public Usuario save(Usuario usuario) throws SQLException {
+    public UsuarioResponseDTO save(UsuarioRequestDTO dto) throws SQLException {
+        Usuario usuario = UsuarioMapper.toModel(dto);
         validarUsuario(usuario);
-        return usuarioDAO.save(usuario);
+
+        Usuario salvo = usuarioDAO.save(usuario);
+        return UsuarioMapper.toResponseDTO(salvo);
     }
 
-    public List<Usuario> findAll() throws SQLException {
-        return usuarioDAO.findAll();
+    public List<UsuarioResponseDTO> findAll() throws SQLException {
+        return usuarioDAO.findAll()
+                .stream()
+                .map(UsuarioMapper::toResponseDTO)
+                .collect(Collectors.toList());
     }
 
-    public Usuario findById(int id) throws SQLException {
+    public UsuarioResponseDTO findById(int id) throws SQLException {
         Usuario usuario = usuarioDAO.findById(id);
 
         if (usuario == null) {
             throw new RuntimeException("Usuário não encontrado para o ID: " + id);
         }
 
-        return usuario;
+        return UsuarioMapper.toResponseDTO(usuario);
     }
 
-    public void update(Usuario usuario) throws SQLException {
-        if (usuarioDAO.findById(usuario.getId()) == null) {
-            throw new IllegalArgumentException("Usuário com ID " + usuario.getId() + " não encontrado.");
+    public UsuarioResponseDTO update(int id, UsuarioRequestDTO dto) throws SQLException {
+        if (usuarioDAO.findById(id) == null) {
+            throw new IllegalArgumentException("Usuário com ID " + id + " não encontrado.");
         }
 
+        Usuario usuario = UsuarioMapper.toModel(dto);
+        usuario.setId(id);
         validarUsuario(usuario);
         usuarioDAO.update(usuario);
+
+        return UsuarioMapper.toResponseDTO(usuario);
     }
 
     public void deleteById(int id) throws SQLException {
@@ -50,7 +63,7 @@ public class UsuarioService {
     }
 
     // Métodos de Validação Auxiliares
-    private void validarUsuario(Usuario usuario) throws SQLException {
+    private void validarUsuario(Usuario usuario) {
         // Validação de campos obrigatórios
         if (usuario.getNome() == null || usuario.getNome().trim().isEmpty()) {
             throw new IllegalArgumentException("Nome é obrigatório.");

@@ -1,7 +1,9 @@
 package com.ctw.strelow.controller;
 
+import com.ctw.strelow.dto.emprestimo.EmprestimoResponseDTO;
+import com.ctw.strelow.dto.usuario.UsuarioRequestDTO;
+import com.ctw.strelow.dto.usuario.UsuarioResponseDTO;
 import com.ctw.strelow.model.Emprestimo;
-import com.ctw.strelow.model.Usuario;
 import com.ctw.strelow.service.EmprestimoService;
 import com.ctw.strelow.service.UsuarioService;
 import org.springframework.http.HttpStatus;
@@ -24,24 +26,22 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public ResponseEntity<?> postUsuario(@RequestBody Usuario usuario) {
+    public ResponseEntity<?> postUsuario(@RequestBody UsuarioRequestDTO usuarioRequestDTO) {
         try {
-            usuarioService.save(usuario);
-            return new ResponseEntity<>(usuario, HttpStatus.CREATED);
+            return new ResponseEntity<>(usuarioService.save(usuarioRequestDTO), HttpStatus.CREATED);
 
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
 
         } catch (SQLException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro no banco: "+ e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro no banco: " + e.getMessage());
         }
     }
 
     @GetMapping
-    public ResponseEntity<List<Usuario>> getAll() {
+    public ResponseEntity<List<UsuarioResponseDTO>> getAll() {
         try {
-            List<Usuario> usuarios = usuarioService.findAll();
-            return ResponseEntity.ok(usuarios);
+            return ResponseEntity.ok(usuarioService.findAll());
 
         } catch (SQLException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -51,8 +51,7 @@ public class UsuarioController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable int id) {
         try {
-            Usuario usuario = usuarioService.findById(id);
-            return ResponseEntity.ok(usuario);
+            return ResponseEntity.ok(usuarioService.findById(id));
 
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -63,11 +62,9 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> putUsuario(@PathVariable int id, @RequestBody Usuario usuario) {
+    public ResponseEntity<?> putUsuario(@PathVariable int id, @RequestBody UsuarioRequestDTO usuarioRequestDTO) {
         try {
-            usuario.setId(id);
-            usuarioService.update(usuario);
-            return ResponseEntity.ok(usuario);
+            return ResponseEntity.ok(usuarioService.update(id, usuarioRequestDTO));
 
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -92,8 +89,7 @@ public class UsuarioController {
     public ResponseEntity<?> getEmprestimosDoUsuario(@PathVariable int id) {
         try {
             usuarioService.findById(id);
-
-            List<Emprestimo> emprestimos = emprestimoService.findByUser(id);
+            List<EmprestimoResponseDTO> emprestimos = emprestimoService.findByUser(id);
             return ResponseEntity.ok(emprestimos);
 
         } catch (RuntimeException e) {

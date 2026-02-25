@@ -1,5 +1,8 @@
 package com.ctw.strelow.service;
 
+import com.ctw.strelow.dto.livro.LivroRequestDTO;
+import com.ctw.strelow.dto.livro.LivroResponseDTO;
+import com.ctw.strelow.mapper.LivroMapper;
 import com.ctw.strelow.model.Livro;
 import com.ctw.strelow.dao.LivroDAO;
 import org.springframework.stereotype.Service;
@@ -7,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class LivroService {
@@ -17,32 +21,42 @@ public class LivroService {
         this.livroDAO = repository;
     }
 
-    public Livro save(Livro livro) throws SQLException {
+    public LivroResponseDTO save(LivroRequestDTO livroRequestDTO) throws SQLException {
+        Livro livro = LivroMapper.toModel(livroRequestDTO);
         validarLivro(livro);
-        return livroDAO.save(livro);
+
+        Livro salvo = livroDAO.save(livro);
+        return LivroMapper.toResponseDTO(salvo);
     }
 
-    public List<Livro> findAll() throws SQLException {
-        return livroDAO.findAll();
+    public List<LivroResponseDTO> findAll() throws SQLException {
+        return livroDAO.findAll()
+                .stream()
+                .map(LivroMapper::toResponseDTO)
+                .collect(Collectors.toList());
     }
 
-    public Livro findById(int id) throws SQLException {
+    public LivroResponseDTO findById(int id) throws SQLException {
         Livro livro = livroDAO.findById(id);
 
         if (livro == null) {
             throw new RuntimeException("Livro não encontrado para o ID: " + id);
         }
 
-        return livro;
+        return LivroMapper.toResponseDTO(livro);
     }
 
-    public void update(Livro livro) throws SQLException {
-        if (livroDAO.findById(livro.getId()) == null) {
-            throw new IllegalArgumentException("Livro com ID " + livro.getId() + " não encontrado.");
+    public LivroResponseDTO update(int id, LivroRequestDTO livroRequestDTO) throws SQLException {
+        if (livroDAO.findById(id) == null) {
+            throw new IllegalArgumentException("Livro com ID " + id + " não encontrado.");
         }
 
+        Livro livro = LivroMapper.toModel(livroRequestDTO);
+        livro.setId(id);
         validarLivro(livro);
         livroDAO.update(livro);
+
+        return LivroMapper.toResponseDTO(livro);
     }
 
     public void deleteById(int id) throws SQLException {

@@ -1,6 +1,7 @@
 package com.ctw.strelow.controller;
 
-import com.ctw.strelow.model.Livro;
+import com.ctw.strelow.dto.livro.LivroRequestDTO;
+import com.ctw.strelow.dto.livro.LivroResponseDTO;
 import com.ctw.strelow.service.LivroService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,24 +21,23 @@ public class LivroController {
     }
 
     @PostMapping
-    public ResponseEntity<?> postLivro(@RequestBody Livro livro) {
+    public ResponseEntity<?> postLivro(@RequestBody LivroRequestDTO livroRequestDTO) {
         try {
-            livroService.save(livro);
-            return new ResponseEntity<>(livro, HttpStatus.CREATED);
+            LivroResponseDTO response = livroService.save(livroRequestDTO);
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
 
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
 
         } catch (SQLException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro no banco: "+ e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro no banco: " + e.getMessage());
         }
     }
 
     @GetMapping
-    public ResponseEntity<List<Livro>> getAll() {
+    public ResponseEntity<List<LivroResponseDTO>> getAll() {
         try {
-            List<Livro> livros = livroService.findAll();
-            return ResponseEntity.ok(livros);
+            return ResponseEntity.ok(livroService.findAll());
 
         } catch (SQLException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -47,8 +47,7 @@ public class LivroController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable int id) {
         try {
-            Livro livro = livroService.findById(id);
-            return ResponseEntity.ok(livro);
+            return ResponseEntity.ok(livroService.findById(id));
 
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -59,11 +58,9 @@ public class LivroController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> putLivro(@PathVariable int id, @RequestBody Livro livro) {
+    public ResponseEntity<?> putLivro(@PathVariable int id, @RequestBody LivroRequestDTO livroRequestDTO) {
         try {
-            livro.setId(id);
-            livroService.update(livro);
-            return ResponseEntity.ok(livro);
+            return ResponseEntity.ok(livroService.update(id, livroRequestDTO));
 
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
