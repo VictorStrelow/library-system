@@ -1,31 +1,13 @@
 package com.ctw.strelow.dto.emprestimo;
 
-public class EmprestimoRequestDTO {
+import jakarta.validation.constraints.Positive;
 
-    private int livro_id;
-    private int usuario_id;
+public record EmprestimoRequestDTO (
 
-    // Construtor
-    public EmprestimoRequestDTO() {}
+        @Positive(message = "O ID do livro deve ser positivo.")
+        int livro_id,
 
-    public EmprestimoRequestDTO(int livro_id, int usuario_id) {
-        this.livro_id = livro_id;
-        this.usuario_id = usuario_id;
-    }
+        @Positive(message = "O ID do usuário deve ser positivo.")
+        int usuario_id
 
-    // Getters e Setters
-    public int getLivro_id() {
-        return livro_id;
-    }
-    public void setLivro_id(int livro_id) {
-        this.livro_id = livro_id;
-    }
-
-    public int getUsuario_id() {
-        return usuario_id;
-    }
-    public void setUsuario_id(int usuario_id) {
-        this.usuario_id = usuario_id;
-    }
-
-}
+) {}

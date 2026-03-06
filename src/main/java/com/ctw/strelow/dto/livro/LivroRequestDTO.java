@@ -1,40 +1,19 @@
 package com.ctw.strelow.dto.livro;
 
-public class LivroRequestDTO {
+import jakarta.validation.constraints.*;
 
-    private String titulo;
-    private String autor;
-    private int ano_publicacao;
+public record LivroRequestDTO(
 
-    // Construtores
-    public LivroRequestDTO() {}
+        @NotBlank(message = "O título é obrigatório!")
+        @Size(min = 1, max = 200, message = "O título deve ter entre 1 e 200 caracteres.")
+        String titulo,
 
-    public LivroRequestDTO(String titulo, String autor, int ano_publicacao) {
-        this.titulo = titulo;
-        this.autor = autor;
-        this.ano_publicacao = ano_publicacao;
-    }
+        @NotBlank(message = "O autor é obrigatório!")
+        @Size(min = 3, max = 100, message = "O nome do autor deve ter entre 3 e 100 caracteres.")
+        String autor,
 
-    // Getters e Setters
-    public String getTitulo() {
-        return titulo;
-    }
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
-    }
+        @Min(value = 1000, message = "O ano de publicação deve ser válido (mínimo 1000).")
+        @Max(value = 2026, message = "O ano de publicação não pode ser no futuro.")
+        int ano_publicacao
 
-    public String getAutor() {
-        return autor;
-    }
-    public void setAutor(String autor) {
-        this.autor = autor;
-    }
-
-    public int getAno_publicacao() {
-        return ano_publicacao;
-    }
-    public void setAno_publicacao(int ano_publicacao) {
-        this.ano_publicacao = ano_publicacao;
-    }
-
-}
+) {}
